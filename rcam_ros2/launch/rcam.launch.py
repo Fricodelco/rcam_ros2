@@ -13,7 +13,7 @@ def generate_launch_description():
     config = os.path.join(
         get_package_share_directory('rcam_ros2'),
         'params',
-        'd415.yaml'
+        'd455.yaml'
         )
     node=Node(
             package='realsense2_camera', 
