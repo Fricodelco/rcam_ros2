@@ -24,6 +24,7 @@ setup(
     entry_points={
         'console_scripts': [
             'static_odom = rcam_ros2.static_odom_pub:main',
+            'chassis_odom = rcam_ros2.chassis_odom:main',
         ],
     },
 )
