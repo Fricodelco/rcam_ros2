@@ -13,6 +13,7 @@ from geometry_msgs.msg import Vector3
 from ChassisInterface import ChassisInterface
 
 class ChassisNode(Node):
+    CameraElevationMeters = 0.4
     WheelBaselineMeters = 0.430
     WheelRadiusMeters = 0.115
     ReportIntervalSec = 0.02
@@ -29,7 +30,9 @@ class ChassisNode(Node):
         self.odom_broadcaster = TransformBroadcaster(self)
         self.x = 0
         self.y = 0
-        self.theta = 0
+        self.yaw = 0
+        self.Vx = 0
+        self.yawRate = 0
 
         self.cmdSpeed = 0
         self.cmdSteering = 0
@@ -41,7 +44,7 @@ class ChassisNode(Node):
         self.sub = self.create_subscription(Twist, 'cmd_vel', self.processCmd, 10)
         logging.info('chassis_odom initialized')
 
-    def processWheelFeedback(self, deviceId, respTuple):
+    def processWheelFeedback(self, DeviceIdIgnored, respTuple):
         now = self.get_clock().now()
         deltaTimeSec = (now.nanoseconds - self.tsFeedback) * ChassisNode.SecInNsec
 
@@ -55,16 +58,16 @@ class ChassisNode(Node):
             self.tsFeedback = now.nanoseconds
             wheelLRadSec = respTuple[0] * ChassisNode.RadPerSecInWheelFeedback
             wheelRRadSec = respTuple[1] * ChassisNode.RadPerSecInWheelFeedback
-            Vx, Vy, Vtheta = self.calculate_odom(deltaTimeSec, wheelRRadSec, wheelLRadSec)
+            self.calculatePose(deltaTimeSec, wheelRRadSec, wheelLRadSec)
 
             logging.debug('chassis_odom wheel feedback : {0} {1} speed {2} yawRate {3} pos [{4} {5}] yaw {6}'.format(
-                wheelLRadSec, wheelRRadSec, Vx, Vtheta, self.x, self.y, self.theta))
+                wheelLRadSec, wheelRRadSec, self.Vx, self.yawRate, self.x, self.y, self.yaw))
 
             quaternion = Quaternion()
             quaternion.x = 0.0
             quaternion.y = 0.0
-            quaternion.z = sin(self.theta / 2)
-            quaternion.w = cos(self.theta / 2)
+            quaternion.z = sin(self.yaw / 2)
+            quaternion.w = cos(self.yaw / 2)
 
             odom = Odometry()
             odom.header.stamp = now.to_msg()
@@ -77,9 +80,9 @@ class ChassisNode(Node):
             odom.pose.covariance[7] = 0.1
             odom.pose.covariance[35] = 0.1
             odom.pose.pose.orientation = quaternion
-            odom.twist.twist.linear.x = Vx
+            odom.twist.twist.linear.x = self.Vx
             odom.twist.twist.linear.y = 0.0
-            odom.twist.twist.angular.z = Vtheta
+            odom.twist.twist.angular.z = self.yawRate
             odom.twist.covariance[0] = 0.01
             odom.twist.covariance[7] = 0.01
             odom.twist.covariance[35] = 0.01
@@ -108,7 +111,7 @@ class ChassisNode(Node):
             transform_stamped_msg.header.frame_id = 'base_link'
             transform_stamped_msg.child_frame_id = 'camera_link'
             transform_stamped_msg.transform.translation = zeroTranslation
-            transform_stamped_msg.transform.translation.z = 0.4
+            transform_stamped_msg.transform.translation.z = ChassisNode.CameraElevationMeters
             self.odom_broadcaster.sendTransform(transform_stamped_msg)
 
     def processCmd(self, data):
@@ -124,18 +127,15 @@ class ChassisNode(Node):
         logging.debug('chassis_odom cmd speed {0}/{1} steering {2}/{3}'.format(
             data.linear.x, self.cmdSpeed, data.angular.z, cmdSteering))
 
-    def calculate_odom(self, delta, Lvel, Rvel):
+    #dtSec : integration interval
+    #Lvel, Rvel : wheels angular speed, rad/sec
+    def calculatePose(self, dtSec, Lvel, Rvel):
         # Lvel= -Lvel
-        Vx = (ChassisNode.WheelRadiusMeters)*(Rvel+Lvel)/2
-        Vy = 0
-
-        Vtheta = -1.6*(ChassisNode.WheelRadiusMeters)*(Rvel-Lvel)/ChassisNode.WheelBaselineMeters
-        # Rotation matrix
-        self.theta += delta * Vtheta
-        self.y += delta * sin(self.theta)*Vx
-        self.x += delta * cos(self.theta)*Vx
-        return Vx, Vy, Vtheta
-
+        self.Vx = (ChassisNode.WheelRadiusMeters)*(Rvel+Lvel)/2
+        self.yawRate = -1.6*(ChassisNode.WheelRadiusMeters)*(Rvel-Lvel)/ChassisNode.WheelBaselineMeters
+        self.yaw += dtSec * self.yawRate
+        self.y += dtSec * sin(self.yaw) * self.Vx
+        self.x += dtSec * cos(self.yaw) * self.Vx
 
 def main():
     rclpy.init()
