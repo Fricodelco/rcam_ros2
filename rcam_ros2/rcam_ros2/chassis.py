@@ -24,7 +24,7 @@ class ChassisNode(Node):
     MaxYawRateRadSec = 1.0  # yaw rate from vel_cmd is scaled and bounded to this. todo : set to actual max yaw rate of chassis
 
     def __init__(self):
-        super().__init__('chassis_odom')
+        super().__init__('chassis')
 
         self.odom_pub = self.create_publisher(Odometry, "odom_dirty", 10)
         self.odom_broadcaster = TransformBroadcaster(self)
@@ -42,7 +42,7 @@ class ChassisNode(Node):
         self.chassis.setWheelCallback(self.processWheelFeedback)
 
         self.sub = self.create_subscription(Twist, 'cmd_vel', self.processCmd, 10)
-        logging.info('chassis_odom initialized')
+        logging.info('chassis node initialized')
 
     def processWheelFeedback(self, DeviceIdIgnored, respTuple):
         now = self.get_clock().now()
@@ -60,7 +60,7 @@ class ChassisNode(Node):
             wheelRRadSec = respTuple[1] * ChassisNode.RadPerSecInWheelFeedback
             self.calculatePose(deltaTimeSec, wheelRRadSec, wheelLRadSec)
 
-            logging.debug('chassis_odom wheel feedback : {0} {1} speed {2} yawRate {3} pos [{4} {5}] yaw {6}'.format(
+            logging.debug('chassis wheel feedback : {0} {1} speed {2} yawRate {3} pos [{4} {5}] yaw {6}'.format(
                 wheelLRadSec, wheelRRadSec, self.Vx, self.yawRate, self.x, self.y, self.yaw))
 
             quaternion = Quaternion()
@@ -124,7 +124,7 @@ class ChassisNode(Node):
         cmdYawRateBounded = max(min(data.angular.z, MaxYawRateRadSec), -MaxYawRateRadSec)
         self.cmdSteering = cmdYawRateBounded / MaxYawRateRadSec
         self.chassis.setSteering(self.cmdSteering)
-        logging.debug('chassis_odom cmd speed {0}/{1} steering {2}/{3}'.format(
+        logging.debug('chassis cmd speed {0}/{1} steering {2}/{3}'.format(
             data.linear.x, self.cmdSpeed, data.angular.z, cmdSteering))
 
     #dtSec : integration interval
