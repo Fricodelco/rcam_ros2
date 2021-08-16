@@ -42,7 +42,17 @@ class WheelOdom(Node):
         transform_stamped_msg.transform.rotation.z = quaternion.z
         transform_stamped_msg.transform.rotation.w = quaternion.w
         self.odom_broadcaster.sendTransform(transform_stamped_msg)
-
+        transform_stamped_msg.header.frame_id = 'map'
+        transform_stamped_msg.child_frame_id = 'odom'
+        transform_stamped_msg.transform.translation.x = 0.0
+        transform_stamped_msg.transform.translation.y = 0.0
+        transform_stamped_msg.transform.translation.z = 0.0
+        transform_stamped_msg.transform.rotation.x = 0.0
+        transform_stamped_msg.transform.rotation.y = 0.0
+        transform_stamped_msg.transform.rotation.z = 0.0
+        transform_stamped_msg.transform.rotation.w = 1.0
+        self.odom_broadcaster.sendTransform(transform_stamped_msg)
+        
     def quaternion_from_euler(self, roll, pitch, yaw):    
         cy = cos(yaw * 0.5)
         sy = sin(yaw * 0.5)

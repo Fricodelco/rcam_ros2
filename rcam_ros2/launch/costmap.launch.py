@@ -99,7 +99,7 @@ def generate_launch_description():
                               'params_file': params_file,
                               'default_bt_xml_filename': default_bt_xml_filename,
                               'use_lifecycle_mgr': 'false',
-                              'map_subscribe_transient_local': 'true'}.items()),
+                              'map_subscribe_transient_local': 'true'}.items())
     ])
 
     # Create the launch description and populate

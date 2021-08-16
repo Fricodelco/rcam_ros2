@@ -49,6 +49,8 @@ install(
   PROGRAMS
   scripts/spawn_robot.py
   scripts/tf_pub.py
+  scripts/teleop.py
+  scripts/costmap_analizer.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

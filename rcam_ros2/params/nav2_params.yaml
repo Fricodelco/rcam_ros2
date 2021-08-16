@@ -179,11 +179,11 @@ local_costmap:
       robot_base_frame: base_link
       use_sim_time: False
       rolling_window: true
-      width: 4
-      height: 4
+      width: 8
+      height: 8
       resolution: 0.05
       robot_radius: 0.1
-      plugins: ["voxel_layer"] 
+      plugins: ["voxel_layer", "inflation_layer"] 
       voxel_layer:
         plugin: "nav2_costmap_2d::VoxelLayer"
         enabled: True
