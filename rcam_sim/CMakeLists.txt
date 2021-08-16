@@ -48,6 +48,7 @@ install(DIRECTORY launch models worlds scripts
 install(
   PROGRAMS
   scripts/spawn_robot.py
+  scripts/tf_pub.py
   DESTINATION lib/${PROJECT_NAME}
 )
 

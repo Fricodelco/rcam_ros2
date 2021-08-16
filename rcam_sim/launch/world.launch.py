@@ -33,5 +33,9 @@ def generate_launch_description():
             "--x", "0.0",
             "--y", "0.0",
             "--z", "0.0"],
+        ),
+        Node(package='rcam_sim', 
+            executable='tf_pub.py', 
+            name='static_odom_node',
         )
     ])

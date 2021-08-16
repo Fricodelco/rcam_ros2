@@ -2,7 +2,7 @@
 <sdf version="1.6">
  <model name='vehicle'>
     <pose>0 0 0.325 0 -0 0</pose>
-    <link name='chassis'>
+    <link name='base_link'>
         <pose>0.0 0 0.0 0 0 0</pose>
         <inertial>
           <mass>1.14395</mass>
@@ -193,7 +193,7 @@
 
 
       <joint name='left_wheel_joint' type='revolute'>
-        <parent>chassis</parent>
+        <parent>base_link</parent>
         <child>left_wheel</child>
         <axis>
           <xyz>0 0 1</xyz>
@@ -205,7 +205,7 @@
       </joint>
 
       <joint name='right_wheel_joint' type='revolute'>
-        <parent>chassis</parent>
+        <parent>base_link</parent>
         <child>right_wheel</child>
         <axis>
           <xyz>0 0 1</xyz>
@@ -217,12 +217,12 @@
       </joint>
 
       <joint name='caster_wheel_back' type='ball'>
-        <parent>chassis</parent>
+        <parent>base_link</parent>
         <child>caster_back</child>
       </joint>
       
       <joint name='caster_wheel_front' type='ball'>
-        <parent>chassis</parent>
+        <parent>base_link</parent>
         <child>caster_front</child>
       </joint>
       
@@ -250,14 +250,14 @@
         <publish_odom_tf>true</publish_odom_tf>
         <publish_wheel_tf>true</publish_wheel_tf>
 
-        <odometry_frame>odom_demo</odometry_frame>
-        <robot_base_frame>chassis</robot_base_frame>
+        <odometry_frame>odom</odometry_frame>
+        <robot_base_frame>base_link</robot_base_frame>
 
       </plugin>
 
-     <link name="cam">
+     <link name="camera_link">
       <inertial>
-        <pose>0.25 0 0.3 0 0 -3.14</pose>
+        <pose>0.0 0 0.0 0 0 0</pose>
         <inertia>
           <ixx>0.001</ixx>
           <ixy>0.000</ixy>
@@ -269,8 +269,8 @@
         <mass>0.01</mass>
       </inertial>
 
-      <collision name="cam_collision">
-        <pose>0.25 0 0.3 0 0 -3.14</pose>
+      <collision name="camera_link_collision">
+        <pose>0.0 0 0.0 0 0 0</pose>
         <geometry>
           <cylinder>
             <radius>0.0508</radius>
@@ -279,8 +279,8 @@
         </geometry>
       </collision>
 
-      <visual name="cam_visual">
-        <pose>0.25 0 0.3 0 0 -3.14</pose>
+      <visual name="camera_visual">
+        <pose>0.0 0 0.0 0 0 0</pose>
         <geometry>
           <cylinder>
             <radius>0.0508</radius>
@@ -288,11 +288,12 @@
           </cylinder>
         </geometry>
       </visual>
+      <pose>0.5 0.0 0.3 0.0 0.0 0.0</pose>
       <sensor type="depth" name="camera">
           <update_rate>15</update_rate>
-          <visualize>false</visualize>
+          <visualize>true</visualize>
           <camera>
-            <horizontal_fov>1.92</horizontal_fov>
+            <horizontal_fov>1.02974</horizontal_fov>
             <image>
               <width>640</width>
               <height>480</height>
@@ -312,12 +313,11 @@
           </camera>
           <plugin name="camera_controller" filename="libgazebo_ros_camera.so">
             <ros>
-
               <!-- topics need to be prefixed with camera_name for remapping -->
               <remapping>mycamera/image_raw:=camera/image</remapping>
               <remapping>mycamera/depth/image_raw:=camera/depth</remapping>
-              <remapping>mycamera/camera_info:=camera/raw_cam_info</remapping>
-              <remapping>mycamera/depth/camera_info:=camera/depth_cam_info</remapping>
+              <remapping>mycamera/camera_info:=camera/camera_info</remapping>
+              <remapping>mycamera/depth/camera_info:=camera/depth_camera_info</remapping>
               <remapping>mycamera/points:=depth/color/points</remapping>
             </ros>
             <!-- omit camera_name to default to sensor name -->
@@ -330,9 +330,13 @@
         </sensor>
     </link>
     
-    <joint name="lds_joint" type="fixed">
-      <parent>chassis</parent>
-      <child>lds_scan</child>
+    <joint name="cam_joint" type="fixed">
+      <parent>base_link</parent>
+      <child>camera_link</child>
+      <pose>0.00 0.0 0.0 0 0 0.0</pose>
+      <axis>
+        <xyz>0 0 1</xyz>
+      </axis>
     </joint>
     
     </model>
