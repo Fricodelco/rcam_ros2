@@ -61,8 +61,8 @@ class CostmapAnalyzer(Node):
         """
             фрагмент ниже визуализирует полученный массив
         """
-        #img = map_image
-        #cv2.imwrite('/tmp/costmap_last.png', img)
+        img = map_image
+        cv2.imwrite('/tmp/costmap_last.png', img)
         #scale_percent = 400
         #width = int(img.shape[1] * scale_percent / 100)
         #height = int(img.shape[0] * scale_percent / 100)
