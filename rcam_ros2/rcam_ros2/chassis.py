@@ -115,17 +115,20 @@ class ChassisNode(Node):
             self.odom_broadcaster.sendTransform(transform_stamped_msg)
 
     def processCmd(self, data):
+        maxSpeed = ChassisNode.MaxSpeedMetersSec
+        maxYawRate = ChassisNode.MaxYawRateRadSec
+
         #todo : add deadzone for Vx and yaw rate
         #todo : reset chassis control to zeroes if cmd_vel has expired
-        cmdSpeedBounded = max(min(data.linear.x, MaxSpeedMetersSec), -MaxSpeedMetersSec)  
-        self.cmdSpeed = cmdSpeedBounded / MaxSpeedMetersSec
+        cmdSpeedBounded = max(min(data.linear.x, maxSpeed), -maxSpeed)  
+        self.cmdSpeed = cmdSpeedBounded / maxSpeed
         self.chassis.setSpeed(self.cmdSpeed)
 
-        cmdYawRateBounded = max(min(data.angular.z, MaxYawRateRadSec), -MaxYawRateRadSec)
-        self.cmdSteering = cmdYawRateBounded / MaxYawRateRadSec
+        cmdYawRateBounded = max(min(data.angular.z, maxYawRate), -maxYawRate)
+        self.cmdSteering = cmdYawRateBounded / maxYawRate
         self.chassis.setSteering(self.cmdSteering)
         logging.debug('chassis cmd speed {0}/{1} steering {2}/{3}'.format(
-            data.linear.x, self.cmdSpeed, data.angular.z, cmdSteering))
+            data.linear.x, self.cmdSpeed, data.angular.z, self.cmdSteering))
 
     #dtSec : integration interval
     #Lvel, Rvel : wheels angular speed, rad/sec
